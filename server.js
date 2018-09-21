@@ -4,6 +4,8 @@ const app = express();
 const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
 const posts = require('./routes/api/posts');
+const bodyParser = require('body-parser');
+const passport = require('passport');
 
 //##########CONNECT DATABASE ##########//
 const db = require('./config/keys').mongoUri;
@@ -12,6 +14,14 @@ mongoose
 .then(()=> console.log('Mongodb is connected!'))
 .catch(err => console.log(err));
 
+//##########MIDDLE-WARE ##########//
+    // TODO: Add Body-parser middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+    // Passport middleware
+app.use(passport.initialize());
+    // Passport config
+require('./config/passport')(passport);
 //########## ROUTES ##########//
 //TODO: Home route
 app.get('/',(req, res)=>{
