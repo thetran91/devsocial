@@ -1,3 +1,4 @@
+//Search on google for Passport github
 const jwtStrategy = require('passport-jwt').Strategy;
 const extractJwt = require('passport-jwt').ExtractJwt; // extract payload
 const mongoose = require('mongoose');

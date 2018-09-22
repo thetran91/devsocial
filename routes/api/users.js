@@ -6,6 +6,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport = require('passport')
+
+// Load Input Validator and insert to each route
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
+
 // @route   GET api/users/test
 // desc     Test user route
 // @acess   Public route
@@ -19,10 +24,17 @@ router.get('/test', (req, res)=>{
 // @acess   Public route
 
 router.post('/register', (req, res)=>{
-    Users.findOne({email: req.body.email})
+    const {errors, isValid} = validateRegisterInput(req.body); //req.body hold all info (id, email, name...)
+    // Check Validation
+        if(isValid){ //WATSE A LOT OF TIME
+            return res.status(400).json(errors);
+        }
+    const email = req.body.email;
+    Users.findOne({email})
         .then(user=>{
             if(user) {
-                return res.status(400).json({email: 'Email already exist!'})
+                errors.email = 'Email is already exist!'
+                return res.status(400).json(errors)
             } else {
                 const avarta = gravatar.url((req.body.email),{
                     s: '200', // Size
@@ -54,6 +66,13 @@ router.post('/register', (req, res)=>{
 // @acess   Public route
 
 router.post('/login', (req,res)=>{
+
+    const {errors, isValid} = validateLoginInput(req.body); //req.body hold all info (id, email, name...)
+    // Check Validation
+        if(isValid){ //WATSE A LOT OF TIME
+            return res.status(400).json(errors);
+        }
+
     const email = req.body.email;
     const password = req.body.password;
 
@@ -62,7 +81,8 @@ router.post('/login', (req,res)=>{
         .then(user => {
             //Check for user
             if(!user){
-                res.json({email: 'Email not found'});
+                errors.email = 'Email not found!'
+                res.json(errors);
             }
 
             //compare between password by req.body.password vs user password in database
@@ -85,7 +105,8 @@ router.post('/login', (req,res)=>{
                                 })
                             });
                     } else {
-                        return res.status(400).json({message: 'Incorrect Password'})
+                        errors.password = 'Incorrect Password!'
+                        return res.status(400).json(errors)
                     }
 
                 })
